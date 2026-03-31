@@ -309,7 +309,8 @@ export class BrowserManager {
     const keepUntil = browser.keepUntil();
     const connected = session.numbConnected;
     const hasKeepUntil = keepUntil > now;
-    const keepOpen = (connected > 0 || hasKeepUntil) && !force;
+    const hasActiveTTLTimer = session.trackingId && this.sessionTTLTimers.has(session.id);
+    const keepOpen = (connected > 0 || hasKeepUntil || hasActiveTTLTimer) && !force;
     const cleanupACtions: Array<() => Promise<void>> = [];
     const priorTimer = this.timers.get(session.id);
 
@@ -319,7 +320,7 @@ export class BrowserManager {
     }
 
     this.log.debug(
-      `${session.numbConnected} Client(s) are currently connected, Keep-until: ${keepUntil}, force: ${force}`,
+      `${session.numbConnected} Client(s) are currently connected, Keep-until: ${keepUntil}, hasTTLTimer: ${!!hasActiveTTLTimer}, force: ${force}`,
     );
 
     if (!force && hasKeepUntil) {
@@ -342,6 +343,13 @@ export class BrowserManager {
     if (!keepOpen) {
       this.log.debug(`Closing browser session`);
       cleanupACtions.push(() => browser.close());
+
+      // Clear TTL timer if exists
+      const ttlTimer = this.sessionTTLTimers.get(session.id);
+      if (ttlTimer) {
+        clearTimeout(ttlTimer);
+        this.sessionTTLTimers.delete(session.id);
+      }
 
       if (session.isTempDataDir) {
         this.log.debug(
@@ -706,6 +714,11 @@ export class BrowserManager {
     });
 
     this.browsers.set(browser, session);
+
+    // Set TTL timer for new sessions with trackingId
+    if (trackingId) {
+      this.refreshSessionActivity(trackingId);
+    }
 
     browser.on('newPage', async (page: Page) => {
       await this.onNewPage(req, page);
