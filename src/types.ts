@@ -273,14 +273,27 @@ export abstract class BrowserHTTPRoute extends BasicHTTPRoute {
   abstract browser: BrowserClasses;
 
   /**
-   * Handles an inbound HTTP request with a 3rd param of the predefined
-   * browser used for the route -- only Chrome CDP is support currently.
+   * Whether this route supports session reuse via trackingId.
+   * Default is true.
+   */
+  supportsSessionReuse: boolean = true;
+
+  /**
+   * Handles an inbound HTTP request with browser and page instances.
+   * @param req The incoming request
+   * @param res The server response
+   * @param logger Logger instance
+   * @param browser The browser instance
+   * @param page The page instance (newly created in the browser context)
+   * @param isNewSession Whether this is a newly created browser session
    */
   abstract handler(
     req: Request,
     res: http.ServerResponse,
     logger: Logger,
     browser: BrowserInstance,
+    page: Page,
+    isNewSession: boolean,
   ): Promise<unknown>;
 
   /**
