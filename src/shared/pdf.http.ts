@@ -11,7 +11,6 @@ import {
   Methods,
   Request,
   SystemQueryParameters,
-  UnwrapPromise,
   WaitForEventOptions,
   WaitForFunctionOptions,
   WaitForSelectorOptions,
@@ -20,7 +19,6 @@ import {
   contentTypes,
   dedent,
   isBase64Encoded,
-  noop,
   rejectRequestPattern,
   rejectResourceTypes,
   requestInterceptors,
@@ -87,6 +85,8 @@ export default class ChromiumPDFPostRoute extends BrowserHTTPRoute {
     res: ServerResponse,
     logger: Logger,
     browser: BrowserInstance,
+    page: Page,
+    isNewSession: boolean,
   ): Promise<void> {
     logger.info('PDF API invoked with body:', req.body);
     const contentType =
@@ -134,9 +134,6 @@ export default class ChromiumPDFPostRoute extends BrowserHTTPRoute {
       throw new BadRequest(`"fullPage" option cannot be used with "height" or "format" options.`);
     }
 
-    const page = (await browser.newPage()) as UnwrapPromise<
-      ReturnType<ChromiumCDP['newPage']>
-    >;
     const gotoCall = url ? page.goto.bind(page) : page.setContent.bind(page);
 
     if (emulateMediaType) {
@@ -282,8 +279,6 @@ export default class ChromiumPDFPostRoute extends BrowserHTTPRoute {
       },
     });
     await pdfStream.pipeTo(writableStream);
-
-    page.close().catch(noop);
 
     logger.debug('PDF API request completed');
   }
