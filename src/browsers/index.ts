@@ -44,6 +44,7 @@ export class BrowserManager {
   protected reconnectionPatterns = ['/devtools/browser', '/function/connect'];
   protected browsers: Map<BrowserInstance, BrowserlessSession> = new Map();
   protected timers: Map<string, NodeJS.Timeout> = new Map();
+  protected sessionTTLTimers: Map<string, NodeJS.Timeout> = new Map();
   protected log = new Logger('browser-manager');
   protected chromeBrowsers = [ChromiumCDP, ChromeCDP, EdgeCDP];
   protected playwrightBrowserNames = [
@@ -376,6 +377,52 @@ export class BrowserManager {
     }
   }
 
+  /**
+   * Finds an existing session by trackingId.
+   * Returns the browser, session, and first page if found and running.
+   */
+  public findSessionByTrackingId(
+    trackingId: string,
+  ): { browser: BrowserInstance; session: BrowserlessSession; page: Page | null } | null {
+    for (const [browser, session] of this.browsers) {
+      if (session.trackingId === trackingId && browser.isRunning()) {
+        return { browser, session, page: null };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Refreshes the session's last activity time and resets the TTL timer.
+   */
+  public refreshSessionActivity(trackingId: string): void {
+    for (const [browser, session] of this.browsers) {
+      if (session.trackingId === trackingId) {
+        session.lastActivityTime = Date.now();
+
+        // Clear existing TTL timer
+        const existingTimer = this.sessionTTLTimers.get(session.id);
+        if (existingTimer) {
+          clearTimeout(existingTimer);
+        }
+
+        // Set new TTL timer
+        const ttl = this.config.getSessionTTL();
+        if (ttl > 0) {
+          const timer = setTimeout(() => {
+            const currentSession = this.browsers.get(browser);
+            if (currentSession && currentSession.numbConnected === 0) {
+              this.log.debug(`Session "${trackingId}" TTL expired, closing`);
+              this.close(browser, currentSession, true);
+            }
+          }, ttl);
+          this.sessionTTLTimers.set(session.id, timer);
+        }
+        return;
+      }
+    }
+  }
+
   public async getAllSessions(
     trackingId?: string,
   ): Promise<BrowserlessSessionJSON[]> {
@@ -644,6 +691,7 @@ export class BrowserManager {
       trackingId,
       ttl: 0,
       userDataDir,
+      lastActivityTime: Date.now(),
     };
 
     // Update logger with session context now that we have tracking ID and session ID
@@ -669,8 +717,10 @@ export class BrowserManager {
     const timers = Array.from(this.timers);
     await Promise.all(timers.map(([, timer]) => clearInterval(timer)));
     this.timers.forEach((t) => clearTimeout(t));
+    this.sessionTTLTimers.forEach((t) => clearTimeout(t));
     this.browsers = new Map();
     this.timers = new Map();
+    this.sessionTTLTimers = new Map();
     await this.stop();
     this.log.info(`Shutdown complete`);
   }
