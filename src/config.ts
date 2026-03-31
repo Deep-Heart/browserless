@@ -187,6 +187,7 @@ export class Config extends EventEmitter {
   protected installedBinaries: Map<string, Array<[number, string, string]>> =
     new Map();
   protected enableDebugger = !!parseEnvVars(true, 'ENABLE_DEBUGGER');
+  protected sessionTTL = +(process.env.SESSION_TTL ?? '1800000'); // Default 30 minutes
 
   public getRoutes(): string {
     return this.routes;
@@ -274,6 +275,9 @@ export class Config extends EventEmitter {
   }
   public getErrorAlertURL() {
     return this.errorAlertURL;
+  }
+  public getSessionTTL(): number {
+    return this.sessionTTL;
   }
 
   public async hasDebugger(): Promise<boolean> {
@@ -440,6 +444,11 @@ export class Config extends EventEmitter {
   public setTimeout(newTimeout: number): number {
     this.emit('timeout', newTimeout);
     return (this.timeout = newTimeout);
+  }
+
+  public setSessionTTL(ttl: number): number {
+    this.emit('sessionTTL', ttl);
+    return (this.sessionTTL = ttl);
   }
 
   public setStatic(newStatic: string): string {
