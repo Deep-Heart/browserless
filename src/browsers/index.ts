@@ -477,16 +477,21 @@ export class BrowserManager {
     const trackingId =
       parseStringParam(req.parsed.searchParams, 'trackingId', '') || undefined;
 
-    // Handle trackingId
-    if (trackingId) {
-      this.browsers.forEach((b) => {
-        if (b.trackingId === trackingId) {
-          throw new BadRequest(
-            `A browser session with trackingId "${trackingId}" already exists`,
-          );
-        }
-      });
+    // Handle session reuse via trackingId for non-reconnection routes
+    if (trackingId && !this.reconnectionPatterns.some((p) => req.parsed.pathname.includes(p))) {
+      const existing = this.findSessionByTrackingId(trackingId);
+      if (existing) {
+        this.log.debug(`Reusing existing session with trackingId "${trackingId}"`);
+        ++existing.session.numbConnected;
+        this.refreshSessionActivity(trackingId);
+        return existing.browser;
+      }
+      // Session doesn't exist, will create new one with this trackingId
+      this.log.debug(`Creating new session with trackingId "${trackingId}"`);
+    }
 
+    // Handle trackingId validation for new sessions
+    if (trackingId) {
       if (trackingId.length > 32) {
         throw new BadRequest(
           `TrackingId "${trackingId}" must be less than 32 characters`,
