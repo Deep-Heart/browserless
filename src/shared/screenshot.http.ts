@@ -89,6 +89,8 @@ export default class ScreenshotPost extends BrowserHTTPRoute {
     res: ServerResponse,
     logger: Logger,
     browser: BrowserInstance,
+    page: Page,
+    isNewSession: boolean,
   ): Promise<void> {
     logger.info('Screenshot API invoked with body:', req.body);
     const contentType =
@@ -138,9 +140,6 @@ export default class ScreenshotPost extends BrowserHTTPRoute {
       throw new BadRequest(`One of "url" or "html" properties are required.`);
     }
 
-    const page = (await browser.newPage()) as UnwrapPromise<
-      ReturnType<ChromiumCDP['newPage']>
-    >;
     const gotoCall = url ? page.goto.bind(page) : page.setContent.bind(page);
 
     if (emulateMediaType) {
@@ -273,7 +272,6 @@ export default class ScreenshotPost extends BrowserHTTPRoute {
 
     await new Promise((r) => readStream.pipe(res).once('close', r));
 
-    page.close().catch(noop);
     logger.debug('Screenshot API request completed');
   }
 }
