@@ -51,8 +51,8 @@ export default class PerformancePost extends BrowserHTTPRoute {
     res: ServerResponse,
     _logger: Logger,
     browser: BrowserInstance,
-    page: Page,
-    isNewSession: boolean,
+    _page: Page,
+    _isNewSession: boolean,
   ): Promise<void> {
     const config = this.config();
     const response = await main({

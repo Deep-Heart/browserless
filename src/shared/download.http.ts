@@ -66,8 +66,8 @@ export default class ChromiumDownloadPostRoute extends BrowserHTTPRoute {
     res: ServerResponse,
     logger: Logger,
     browser: BrowserInstance,
-    page: Page,
-    isNewSession: boolean,
+    _page: Page,
+    _isNewSession: boolean,
   ): Promise<void> {
     return new Promise(async (resolve, reject) => {
       const config = this.config();
@@ -89,7 +89,7 @@ export default class ChromiumDownloadPostRoute extends BrowserHTTPRoute {
         return;
       }
 
-      const { page } = response;
+      const { page: _handlerPage } = response;
       logger.debug(`Download function has returned, finding downloads...`);
       async function checkIfDownloadComplete(): Promise<string | null> {
         if (res.headersSent) {

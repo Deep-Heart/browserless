@@ -5,6 +5,7 @@ import {
   BrowserInstance,
   BrowserlessRoutes,
   CDPLaunchOptions,
+  ChromiumCDP,
   HTTPRoutes,
   InBoundRequest,
   Logger,
@@ -235,9 +236,9 @@ export default class ChromiumScrapePostRoute extends BrowserHTTPRoute {
     req: Request,
     res: ServerResponse,
     logger: Logger,
-    browser: BrowserInstance,
+    _browser: BrowserInstance,
     page: Page,
-    isNewSession: boolean,
+    _isNewSession: boolean,
   ) {
     logger.info('Scrape API invoked with body:', req.body);
     const contentType =

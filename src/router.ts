@@ -111,7 +111,7 @@ export class Router extends EventEmitter {
               res,
               logger,
               browser,
-              page,
+              page as Page,
               isNewSession,
             ),
             new Promise((resolve, reject) => {

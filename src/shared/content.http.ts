@@ -5,6 +5,7 @@ import {
   BrowserInstance,
   BrowserlessRoutes,
   CDPLaunchOptions,
+  ChromiumCDP,
   HTTPRoutes,
   Logger,
   Methods,
@@ -77,9 +78,9 @@ export default class ChromiumContentPostRoute extends BrowserHTTPRoute {
     req: Request,
     res: ServerResponse,
     logger: Logger,
-    browser: BrowserInstance,
+    _browser: BrowserInstance,
     page: Page,
-    isNewSession: boolean,
+    _isNewSession: boolean,
   ): Promise<void> {
     logger.info('Content API invoked with body:', req.body);
     const contentType =

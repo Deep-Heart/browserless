@@ -11,7 +11,6 @@ import {
   Methods,
   Request,
   SystemQueryParameters,
-  UnwrapPromise,
   WaitForEventOptions,
   WaitForFunctionOptions,
   WaitForSelectorOptions,
@@ -20,7 +19,6 @@ import {
   contentTypes,
   dedent,
   isBase64Encoded,
-  noop,
   rejectRequestPattern,
   rejectResourceTypes,
   requestInterceptors,
@@ -88,9 +86,9 @@ export default class ScreenshotPost extends BrowserHTTPRoute {
     req: Request,
     res: ServerResponse,
     logger: Logger,
-    browser: BrowserInstance,
+    _browser: BrowserInstance,
     page: Page,
-    isNewSession: boolean,
+    _isNewSession: boolean,
   ): Promise<void> {
     logger.info('Screenshot API invoked with body:', req.body);
     const contentType =
