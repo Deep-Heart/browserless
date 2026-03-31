@@ -25,6 +25,7 @@ import { createReadStream } from 'fs';
 import { deleteAsync } from 'del';
 import functionHandler from './utils/function/handler.js';
 import path from 'path';
+import { Page } from 'puppeteer-core';
 
 interface JSONSchema {
   code: string;
@@ -65,6 +66,8 @@ export default class ChromiumDownloadPostRoute extends BrowserHTTPRoute {
     res: ServerResponse,
     logger: Logger,
     browser: BrowserInstance,
+    page: Page,
+    isNewSession: boolean,
   ): Promise<void> {
     return new Promise(async (resolve, reject) => {
       const config = this.config();
@@ -107,9 +110,6 @@ export default class ChromiumDownloadPostRoute extends BrowserHTTPRoute {
       }
 
       const filePath = await checkIfDownloadComplete();
-      logger.debug(`Closing pages.`);
-      page.close();
-      page.removeAllListeners();
 
       const rmDownload = once(
         () =>

@@ -5,13 +5,11 @@ import {
   BrowserInstance,
   BrowserlessRoutes,
   CDPLaunchOptions,
-  ChromiumCDP,
   HTTPRoutes,
   Logger,
   Methods,
   Request,
   SystemQueryParameters,
-  UnwrapPromise,
   WaitForEventOptions,
   WaitForFunctionOptions,
   WaitForSelectorOptions,
@@ -19,7 +17,6 @@ import {
   bestAttemptCatch,
   contentTypes,
   isBase64Encoded,
-  noop,
   rejectRequestPattern,
   rejectResourceTypes,
   requestInterceptors,
@@ -81,6 +78,8 @@ export default class ChromiumContentPostRoute extends BrowserHTTPRoute {
     res: ServerResponse,
     logger: Logger,
     browser: BrowserInstance,
+    page: Page,
+    isNewSession: boolean,
   ): Promise<void> {
     logger.info('Content API invoked with body:', req.body);
     const contentType =
@@ -123,9 +122,6 @@ export default class ChromiumContentPostRoute extends BrowserHTTPRoute {
       throw new BadRequest(`One of "url" or "html" properties are required.`);
     }
 
-    const page = (await browser.newPage()) as UnwrapPromise<
-      ReturnType<ChromiumCDP['newPage']>
-    >;
     const gotoCall = url ? page.goto.bind(page) : page.setContent.bind(page);
 
     if (emulateMediaType) {
@@ -240,8 +236,6 @@ export default class ChromiumContentPostRoute extends BrowserHTTPRoute {
     }
 
     const markup = await page.content();
-
-    page.close().catch(noop);
 
     logger.info('Content API request completed');
 

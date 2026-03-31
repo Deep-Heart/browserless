@@ -13,6 +13,7 @@ import {
   contentTypes,
   jsonResponse,
 } from '@browserless.io/browserless';
+import { Page } from 'puppeteer-core';
 import { ServerResponse } from 'http';
 
 import main from './utils/performance/main.js';
@@ -50,6 +51,8 @@ export default class PerformancePost extends BrowserHTTPRoute {
     res: ServerResponse,
     _logger: Logger,
     browser: BrowserInstance,
+    page: Page,
+    isNewSession: boolean,
   ): Promise<void> {
     const config = this.config();
     const response = await main({

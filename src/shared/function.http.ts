@@ -16,6 +16,7 @@ import {
   dedent,
   writeResponse,
 } from '@browserless.io/browserless';
+import { Page } from 'puppeteer-core';
 import { ServerResponse } from 'http';
 import Stream from 'stream';
 import { fileTypeFromBuffer } from 'file-type';
@@ -61,6 +62,8 @@ export default class ChromiumFunctionPostRoute extends BrowserHTTPRoute {
     res: ServerResponse,
     logger: Logger,
     browser: BrowserInstance,
+    page: Page,
+    isNewSession: boolean,
   ): Promise<void> {
     const config = this.config();
     const timeout = req.parsed.searchParams.get('timeout');
@@ -70,8 +73,6 @@ export default class ChromiumFunctionPostRoute extends BrowserHTTPRoute {
     const { contentType, payload, page } = await handler(req, browser);
 
     logger.info(`Got function response of "${contentType}"`);
-    page.close();
-    page.removeAllListeners();
 
     if (contentType === 'uint8array') {
       const response = new Uint8Array(payload as Buffer);
