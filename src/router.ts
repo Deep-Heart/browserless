@@ -16,6 +16,7 @@ import {
   isConnected,
   writeResponse,
 } from '@browserless.io/browserless';
+import { Page } from 'puppeteer-core';
 import { EventEmitter } from 'events';
 import micromatch from 'micromatch';
 import stream from 'stream';
@@ -91,10 +92,28 @@ export class Router extends EventEmitter {
           return writeResponse(res, 500, `Error loading the browser`);
         }
 
+        // Get trackingId from request to determine if this is a reused session
+        const trackingId = req.parsed.searchParams.get('trackingId') || undefined;
+        const existingSession = trackingId
+          ? this.browserManager.findSessionByTrackingId(trackingId)
+          : null;
+        const isNewSession = !existingSession || existingSession.browser !== browser;
+
+        // Create page - each request gets a new page, but they share the browser context
+        // which preserves cookies, localStorage, sessionStorage, and cache
+        const page = await browser.newPage();
+
         try {
           this.log.trace(`Running found HTTP handler.`);
           return await Promise.race([
-            handler(req, res, logger, browser),
+            (handler as BrowserHTTPRoute['handler'])(
+              req,
+              res,
+              logger,
+              browser,
+              page,
+              isNewSession,
+            ),
             new Promise((resolve, reject) => {
               res.once('close', () => {
                 if (!res.writableEnded) {
@@ -107,6 +126,8 @@ export class Router extends EventEmitter {
           ]);
         } finally {
           this.log.trace(`HTTP Request handler has finished.`);
+          // Always close the page - browser context (cookies, localStorage) persists
+          page.close().catch(() => {});
           this.browserManager.complete(browser);
         }
       }
