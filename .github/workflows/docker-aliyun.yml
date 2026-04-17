@@ -34,10 +34,8 @@ jobs:
       - name: Build and push Chromium image
         uses: docker/build-push-action@v7
         with:
-          build-args: |
-            VERSION=latest
           builder: ${{ steps.buildx.outputs.name }}
-          file: ./docker/chromium/Dockerfile
+          file: ./docker/chromium/Dockerfile.aliyun
           tags: |
             crpi-3jrq2apsm2w10guu.cn-hangzhou.personal.cr.aliyuncs.com/byteindex-readeep/ibrowsers:${{ steps.sha.outputs.SHORT_SHA }}
             crpi-3jrq2apsm2w10guu.cn-hangzhou.personal.cr.aliyuncs.com/byteindex-readeep/ibrowsers:latest
@@ -45,4 +43,3 @@ jobs:
           push: true
           platforms: |
             linux/amd64
-            linux/arm64
