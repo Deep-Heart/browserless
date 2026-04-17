@@ -1,0 +1,48 @@
+name: Publish Docker Image to Aliyun Registry
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push_to_aliyun:
+    name: Push Docker image to Aliyun Container Registry
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v6
+
+      - name: Get short commit SHA
+        id: sha
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to Aliyun Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: crpi-3jrq2apsm2w10guu.cn-hangzhou.personal.cr.aliyuncs.com
+          username: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
+          password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+
+      - name: Build and push Chromium image
+        uses: docker/build-push-action@v7
+        with:
+          build-args: |
+            VERSION=latest
+          builder: ${{ steps.buildx.outputs.name }}
+          file: ./docker/chromium/Dockerfile
+          tags: |
+            crpi-3jrq2apsm2w10guu.cn-hangzhou.personal.cr.aliyuncs.com/byteindex-readeep/ibrowsers:${{ steps.sha.outputs.SHORT_SHA }}
+            crpi-3jrq2apsm2w10guu.cn-hangzhou.personal.cr.aliyuncs.com/byteindex-readeep/ibrowsers:latest
+          context: .
+          push: true
+          platforms: |
+            linux/amd64
+            linux/arm64
