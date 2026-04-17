@@ -10,10 +10,17 @@ export default [
   'ChromePerformancePostRoute',
   'ChromeScrapePostRoute',
   'ChromeScreenshotPostRoute',
+  'ChromeJSONListGetRoute',
+  'ChromeJSONNewPutRoute',
+  'ChromeJSONProtocolGetRoute',
+  'ChromeJSONVersionGetRoute',
 
   // Chrome WebSocket routes
-  'ChromeCDPRoute',
-  'ChromePlaywrightRoute',
+  'ChromeBrowserWebSocketRoute',
+  'ChromeCDPWebSocketRoute',
+  'ChromePlaywrightWebSocketRoute',
+  'ChromePageWebSocketRoute',
+  'ChromeFunctionConnectWebSocketRoute',
 
   // Edge HTTP routes
   'EdgeContentPostRoute',
@@ -23,8 +30,21 @@ export default [
   'EdgePerformancePostRoute',
   'EdgeScrapePostRoute',
   'EdgeScreenshotPostRoute',
+  'EdgeJSONListGetRoute',
+  'EdgeJSONNewPutRoute',
+  'EdgeJSONProtocolGetRoute',
+  'EdgeJSONVersionGetRoute',
 
   // Edge WebSocket routes
-  'EdgeCDPRoute',
-  'EdgePlaywrightRoute',
+  'EdgeBrowserWebSocketRoute',
+  'EdgeCDPWebSocketRoute',
+  'EdgePlaywrightWebSocketRoute',
+  'EdgePageWebSocketRoute',
+  'EdgeFunctionConnectWebSocketRoute',
+
+  // Firefox routes (not installed)
+  'FirefoxPlaywrightWebSocketRoute',
+
+  // WebKit routes (not installed)
+  'WebKitPlaywrightWebSocketRoute',
 ];

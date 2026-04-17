@@ -15,10 +15,17 @@ import { Browserless, Logger } from '@browserless.io/browserless';
     'ChromePerformancePostRoute',
     'ChromeScrapePostRoute',
     'ChromeScreenshotPostRoute',
+    'ChromeJSONListGetRoute',
+    'ChromeJSONNewPutRoute',
+    'ChromeJSONProtocolGetRoute',
+    'ChromeJSONVersionGetRoute',
 
     // Chrome WebSocket routes
-    'ChromeCDPRoute',
-    'ChromePlaywrightRoute',
+    'ChromeBrowserWebSocketRoute',
+    'ChromeCDPWebSocketRoute',
+    'ChromePlaywrightWebSocketRoute',
+    'ChromePageWebSocketRoute',
+    'ChromeFunctionConnectWebSocketRoute',
 
     // Edge HTTP routes
     'EdgeContentPostRoute',
@@ -28,16 +35,23 @@ import { Browserless, Logger } from '@browserless.io/browserless';
     'EdgePerformancePostRoute',
     'EdgeScrapePostRoute',
     'EdgeScreenshotPostRoute',
+    'EdgeJSONListGetRoute',
+    'EdgeJSONNewPutRoute',
+    'EdgeJSONProtocolGetRoute',
+    'EdgeJSONVersionGetRoute',
 
     // Edge WebSocket routes
-    'EdgeCDPRoute',
-    'EdgePlaywrightRoute',
+    'EdgeBrowserWebSocketRoute',
+    'EdgeCDPWebSocketRoute',
+    'EdgePlaywrightWebSocketRoute',
+    'EdgePageWebSocketRoute',
+    'EdgeFunctionConnectWebSocketRoute',
 
     // Firefox routes (not installed)
-    'FirefoxPlaywrightRoute',
+    'FirefoxPlaywrightWebSocketRoute',
 
     // WebKit routes (not installed)
-    'WebKitPlaywrightRoute',
+    'WebKitPlaywrightWebSocketRoute',
   );
 
   browserless.start();

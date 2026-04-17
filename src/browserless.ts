@@ -423,8 +423,10 @@ export class Browserless extends EventEmitter {
     ];
 
     // Validate that we have the browsers they are asking for
+    // Skip validation for disabled routes
     allRoutes
       .flat()
+      .filter((route) => !this.routeIsDisabled(route))
       .map((route) => {
         if (
           'browser' in route &&
