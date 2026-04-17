@@ -86,16 +86,17 @@ RUN . $NVM_DIR/nvm.sh && npm clean-install
 # Copy all source files
 COPY . .
 
-# Build the application
+# Build the application (including chromium-specific entry point)
 RUN . $NVM_DIR/nvm.sh && \
     ./node_modules/playwright-core/cli.js install --with-deps chromium && \
     npm run build && \
     npm run build:function && \
     npm prune production && \
     npm run install:debugger && \
+    chmod +x ./scripts/start-chromium.sh && \
     chown -R blessuser:blessuser $APP_DIR && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 USER blessuser
 
-CMD ["./scripts/start.sh"]
+CMD ["./scripts/start-chromium.sh"]
