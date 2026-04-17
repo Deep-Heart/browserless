@@ -32,11 +32,13 @@ RUN mkdir -p $APP_DIR $NVM_DIR && \
 
 WORKDIR $APP_DIR
 
+# Use Aliyun mirror for Ubuntu packages (faster in China)
+RUN sed -i 's@//.*archive.ubuntu.com@//mirrors.aliyun.com@g' /etc/apt/sources.list.d/ubuntu.sources && \
+    sed -i 's@//.*security.ubuntu.com@//mirrors.aliyun.com@g' /etc/apt/sources.list.d/ubuntu.sources
+
 RUN apt-get update \
   && apt-get install -y --no-install-recommends software-properties-common \
   && add-apt-repository universe \
-  && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-  && add-apt-repository multiverse \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
   ca-certificates \
@@ -79,7 +81,7 @@ RUN curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | b
 # Copy package files first for better caching
 COPY package.json package-lock.json ./
 
-RUN npm clean-install
+RUN . $NVM_DIR/nvm.sh && npm clean-install
 
 # Copy all source files
 COPY . .
